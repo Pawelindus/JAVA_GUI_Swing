@@ -1,6 +1,8 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -37,11 +39,14 @@ public class Swing_project {
         JMenuItem openItem = new JMenuItem("Open File");
         JMenuItem saveItem = new JMenuItem("Save File");
         JMenuItem addRowItem = new JMenuItem("Add Row");
+        JMenuItem removeRowItem = new JMenuItem("Remove Row");
         frame.setJMenuBar(menuBar);
         menuBar.add(menuFile);
+        menuBar.add(menuTable);
         menuFile.add(openItem);
         menuFile.add(saveItem);
         menuTable.add(addRowItem);
+        menuTable.add(removeRowItem);
 
         //OpenItem Section
         openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
@@ -69,7 +74,7 @@ public class Swing_project {
             }
 
             //JTable creation
-            table[0] = new JTable(data, columnNames);
+            table[0] = new JTable(new DefaultTableModel(data, columnNames));
             table[0].getTableHeader().setReorderingAllowed(false);
             table[0].setAutoCreateRowSorter(true);
 
@@ -81,26 +86,39 @@ public class Swing_project {
 
         //SaveItem Section
         saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
-        saveItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fileChooser.showSaveDialog(frame);
-                String option = fileChooser.getSelectedFile().getAbsolutePath();
-                File file = new File(option);
-                PrintStream fileStream = null;
-                try {
-                    fileStream = new PrintStream(file);
-                } catch (FileNotFoundException fileNotFoundException) {
-                    fileNotFoundException.printStackTrace();
-                }
-                for (int i = 0; i < table[0].getColumnCount()-1; i++) {
-                    assert fileStream != null;
-                    fileStream.println(table[0].getModel().getValueAt(i,0) + " " + table[0].getModel().getValueAt(i,1) + " " + table[0].getModel().getValueAt(i,2) + " " + table[0].getModel().getValueAt(i,3));
-                }
+        saveItem.addActionListener(e -> {
+            fileChooser.showSaveDialog(frame);
+            String option = fileChooser.getSelectedFile().getAbsolutePath();
+            File file = new File(option);
+            PrintStream fileStream = null;
+            try {
+                fileStream = new PrintStream(file);
+            } catch (FileNotFoundException fileNotFoundException) {
+                fileNotFoundException.printStackTrace();
+            }
+            for (int i = 0; i < table[0].getColumnCount() - 1; i++) {
+                assert fileStream != null;
+                fileStream.println(table[0].getModel().getValueAt(i, 0) + " " + table[0].getModel().getValueAt(i, 1) + " " + table[0].getModel().getValueAt(i, 2) + " " + table[0].getModel().getValueAt(i, 3));
+            }
 
 
+        });
+
+        addRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
+        addRowItem.addActionListener(e -> {
+            DefaultTableModel model = (DefaultTableModel) table[0].getModel();
+            model.addRow(new Object[]{"", "", "", ""});
+        });
+
+        removeRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
+        removeRowItem.addActionListener(e -> {
+            DefaultTableModel model = (DefaultTableModel) table[0].getModel();
+            if (table[0].isRowSelected(table[0].getSelectedRow())) {
+
+                model.removeRow(table[0].getSelectedRow());
             }
         });
+
 
     }
 }

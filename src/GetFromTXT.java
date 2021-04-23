@@ -13,7 +13,6 @@ class GetFromTXT {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             while ((i = bufferedReader.read()) != -1) {
                 if (spaceN == 0) {
-                    spaceN = 0;
                     employees[j] = new Employee();
                 }
                 if (spaceN == 0 && i != ' ') {
