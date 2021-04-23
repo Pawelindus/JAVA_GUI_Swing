@@ -3,7 +3,6 @@ import java.io.FileReader;
 import java.io.IOException;
 
 class GetFromTXT {
-
     public Employee[] getFromFile(String file, int lines) {
         Employee[] employees = new Employee[lines];
         int i;
@@ -77,7 +76,7 @@ class GetFromTXT {
         return employees;
     }
     public int countFileLines(String file) {
-        int lines = 1;
+        int lines = 0;
         int i;
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
