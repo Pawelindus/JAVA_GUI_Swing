@@ -6,6 +6,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Swing_project {
     public static void main(String[] args) {
@@ -16,21 +17,19 @@ public class Swing_project {
         JFrame frame = new JFrame();
         JPanel panelMain = new JPanel(new BorderLayout());
         JFileChooser fileChooser = new JFileChooser();
-        JScrollPane scrollPane = new JScrollPane(panelMain);
-        JTable[] table = new JTable[1];
+        AtomicReference<JTable> table = new AtomicReference<>(new JTable(new DefaultTableModel()));
 
-
-        //ScrollPane
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         //Table Column Names
-        String[] columnNames = {"Forename", "Surname", "Job position", "Salary"};
+        String[] columnNames = {"Forename", "Surname", "Job position", "Years of work", "Salary"};
 
-        //Frame Section
+        //Frame and panelMain Section
+
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(panelMain);
         frame.setSize(500, 500);
+        panelMain.setPreferredSize(new Dimension(500, 500));
+        panelMain.setBackground(Color.getHSBColor(12, 12, 12));
 
         //MenuBar Section
         JMenuBar menuBar = new JMenuBar();
@@ -52,36 +51,50 @@ public class Swing_project {
         openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
         openItem.addActionListener(e -> {
             fileChooser.showOpenDialog(frame);
-            String option = fileChooser.getSelectedFile().getAbsolutePath();
-            GetFromTXT getFromTXT = new GetFromTXT();
-            int lines = getFromTXT.countFileLines(option);
-            Employee[] employees = getFromTXT.getFromFile(option, lines);
+            if (fileChooser.getSelectedFile() != null) {
+                panelMain.removeAll();
+                String option = fileChooser.getSelectedFile().getAbsolutePath();
+                GetFromTXT getFromTXT = new GetFromTXT();
+                int lines = getFromTXT.countFileLines(option);
+                Employee[] employees = getFromTXT.getFromFile(option, lines);
 
-            //Data for JTable
-            Object[][] data = new Object[lines][4];
-            for (int i = 0; i < lines; i++) {
-                for (int j = 0; j < 4; j++) {
-                    if (j == 0) {
-                        data[i][j] = employees[i].getForename();
-                    } else if (j == 1) {
-                        data[i][j] = employees[i].getSurname();
-                    } else if (j == 2) {
-                        data[i][j] = employees[i].getJobsEnum();
-                    } else {
-                        data[i][j] = employees[i].getSalary();
+                //Data for JTable
+                Object[][] data = new Object[lines][5];
+                for (int i = 0; i < lines; i++) {
+                    for (int j = 0; j < 5; j++) {
+                        if (j == 0) {
+                            data[i][j] = employees[i].getForename();
+                        } else if (j == 1) {
+                            data[i][j] = employees[i].getSurname();
+                        } else if (j == 2) {
+                            data[i][j] = employees[i].getJobsEnum();
+                        } else if (j == 3) {
+                            data[i][j] = employees[i].getYearsOfWork();
+                        } else {
+                            data[i][j] = employees[i].getSalary();
+                        }
                     }
                 }
+
+                //JTable creation
+                table.set(new JTable(new DefaultTableModel(data, columnNames)));
+                table.get().getTableHeader().setReorderingAllowed(false);
+                table.get().setAutoCreateRowSorter(true);
+                table.get().setPreferredScrollableViewportSize(new Dimension(500,100)) ;
+                table.get().setFillsViewportHeight(true);
+
+                //Adding JTable to panelMain
+                panelMain.add(table.get().getTableHeader(), BorderLayout.PAGE_START);
+                panelMain.add(table.get(), BorderLayout.CENTER);
+                JScrollPane scrollPane = new JScrollPane(table.get(), ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+                scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+                frame.add(scrollPane);
+
+                panelMain.revalidate();
+                frame.revalidate();
+
             }
-
-            //JTable creation
-            table[0] = new JTable(new DefaultTableModel(data, columnNames));
-            table[0].getTableHeader().setReorderingAllowed(false);
-            table[0].setAutoCreateRowSorter(true);
-
-            //Adding JTable to panelMain
-            panelMain.add(table[0].getTableHeader(), BorderLayout.PAGE_START);
-            panelMain.add(table[0], BorderLayout.CENTER);
-            panelMain.revalidate();
         });
 
         //SaveItem Section
@@ -96,9 +109,9 @@ public class Swing_project {
             } catch (FileNotFoundException fileNotFoundException) {
                 fileNotFoundException.printStackTrace();
             }
-            for (int i = 0; i < table[0].getColumnCount() - 1; i++) {
+            for (int i = 0; i < table.get().getColumnCount() - 1; i++) {
                 assert fileStream != null;
-                fileStream.println(table[0].getModel().getValueAt(i, 0) + " " + table[0].getModel().getValueAt(i, 1) + " " + table[0].getModel().getValueAt(i, 2) + " " + table[0].getModel().getValueAt(i, 3));
+                fileStream.println(table.get().getModel().getValueAt(i, 0) + " " + table.get().getModel().getValueAt(i, 1) + " " + table.get().getModel().getValueAt(i, 2) + " " + table.get().getModel().getValueAt(i, 3));
             }
 
 
@@ -106,16 +119,16 @@ public class Swing_project {
 
         addRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
         addRowItem.addActionListener(e -> {
-            DefaultTableModel model = (DefaultTableModel) table[0].getModel();
-            model.addRow(new Object[]{"", "", "", ""});
+            DefaultTableModel model = (DefaultTableModel) table.get().getModel();
+            model.addRow(new Object[]{"", "", "", "", ""});
         });
 
         removeRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         removeRowItem.addActionListener(e -> {
-            DefaultTableModel model = (DefaultTableModel) table[0].getModel();
-            if (table[0].isRowSelected(table[0].getSelectedRow())) {
+            DefaultTableModel model = (DefaultTableModel) table.get().getModel();
+            if (table.get().isRowSelected(table.get().getSelectedRow())) {
 
-                model.removeRow(table[0].getSelectedRow());
+                model.removeRow(table.get().getSelectedRow());
             }
         });
 

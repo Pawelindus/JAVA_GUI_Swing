@@ -50,10 +50,16 @@ class GetFromTXT {
                         employees[j].setJobsEnum(Jobs.RECEPTIONIST);
                     }
                 }
-                if (spaceN == 3 && i != '\r') {
+                if (spaceN == 3 && i != ' ') {
                     text += (char) i;
                 }
-                if ((i == '\r' || i == ' ') && spaceN == 3) {
+                if (i == ' ' && spaceN == 3) {
+                    employees[j].setYearsOfWork(Integer.parseInt(text));
+                }
+                if (spaceN == 4 && i != '\r') {
+                    text += (char) i;
+                }
+                if ((i == '\r' || i == ' ') && spaceN == 4) {
                     employees[j].setSalary(Integer.parseInt(text));
                 }
                 if (i == ' ') {
