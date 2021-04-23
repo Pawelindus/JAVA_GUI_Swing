@@ -1,8 +1,18 @@
 public enum Jobs {
-    CEO,
-    MANAGER,
-    ACCOUNTING,
-    MARKETING,
-    QUALITY_CONTROL,
-    RECEPTIONIST
+    CEO("CEO"),
+    MANAGER("MANAGER"),
+    ACCOUNTING("ACCOUNTING"),
+    MARKETING("MARKETING"),
+    QUALITY_CONTROL("QUALITY_CONTROL"),
+    RECEPTIONIST("RECEPTIONIST");
+
+    private final String label;
+
+    Jobs(String label) {
+        this.label = label;
+    }
+
+    public String getLabel() {
+        return label;
+    }
 }
