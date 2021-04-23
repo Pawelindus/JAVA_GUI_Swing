@@ -54,7 +54,7 @@ class GetFromTXT {
                 if (spaceN == 3 && i != '\r') {
                     text += (char) i;
                 }
-                if ((i == '\r' || i==' ') && spaceN == 3) {
+                if ((i == '\r' || i == ' ') && spaceN == 3) {
                     employees[j].setSalary(Integer.parseInt(text));
                 }
                 if (i == ' ') {
@@ -75,6 +75,7 @@ class GetFromTXT {
 
         return employees;
     }
+
     public int countFileLines(String file) {
         int lines = 0;
         int i;
