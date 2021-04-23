@@ -4,8 +4,8 @@ import java.io.IOException;
 
 class GetFromTXT {
 
-    public Employee[] getFromFile(String file) {
-        Employee[] employees = new Employee[1];
+    public Employee[] getFromFile(String file, int lines) {
+        Employee[] employees = new Employee[lines];
         int i;
         int j = 0;
         int spaceN = 0;
@@ -17,22 +17,22 @@ class GetFromTXT {
                     spaceN = 0;
                     employees[j] = new Employee();
                 }
+                if (spaceN == 0 && i != ' ') {
+                    text += (char) i;
+                }
+                if (i == ' ' && spaceN == 0) {
+                    employees[j].setForename(text);
+                }
                 if (spaceN == 1 && i != ' ') {
                     text += (char) i;
                 }
                 if (i == ' ' && spaceN == 1) {
-                    employees[j].setForename(text);
+                    employees[j].setSurname(text);
                 }
                 if (spaceN == 2 && i != ' ') {
                     text += (char) i;
                 }
                 if (i == ' ' && spaceN == 2) {
-                    employees[j].setSurname(text);
-                }
-                if (spaceN == 3 && i != ' ') {
-                    text += (char) i;
-                }
-                if (i == ' ' && spaceN == 3) {
                     if (text.equals(Jobs.CEO.getLabel())) {
                         employees[j].setJobsEnum(Jobs.CEO);
                     }
@@ -52,10 +52,10 @@ class GetFromTXT {
                         employees[j].setJobsEnum(Jobs.RECEPTIONIST);
                     }
                 }
-                if (spaceN == 4 && i != ' ') {
+                if (spaceN == 3 && i != '\r') {
                     text += (char) i;
                 }
-                if (i == ' ' && spaceN == 4) {
+                if ((i == '\r' || i==' ') && spaceN == 3) {
                     employees[j].setSalary(Integer.parseInt(text));
                 }
                 if (i == ' ') {
@@ -76,4 +76,19 @@ class GetFromTXT {
 
         return employees;
     }
-} 
+    public int countFileLines(String file) {
+        int lines = 1;
+        int i;
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+            while ((i = bufferedReader.read()) != -1) {
+                if (i == '\n') {
+                    lines++;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lines;
+    }
+}

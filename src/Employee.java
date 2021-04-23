@@ -4,9 +4,10 @@ public class Employee {
     private int salary;
     private Enum<Jobs> jobsEnum;
 
-    public Employee(){}
+    public Employee() {
+    }
 
-    public Employee(String forename, String surname, int salary, Enum<Jobs> jobsEnum) {
+    public Employee(String forename, String surname, Enum<Jobs> jobsEnum, int salary) {
         this.forename = forename;
         this.surname = surname;
         this.salary = salary;
@@ -44,4 +45,11 @@ public class Employee {
     public void setJobsEnum(Enum<Jobs> jobsEnum) {
         this.jobsEnum = jobsEnum;
     }
+
+    @Override
+    public String toString() {
+        return forename + " " + surname + " " + jobsEnum + " " + salary;
+    }
 }
+
+
