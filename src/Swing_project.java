@@ -81,11 +81,6 @@ public class Swing_project {
 
                 //JTable creation
                 table.set(new JTable(new DefaultTableModel(data, columnNames)));
-                table.get().getTableHeader().setReorderingAllowed(false);
-                table.get().setAutoCreateRowSorter(true);
-
-                table.get().setPreferredScrollableViewportSize(new Dimension(500, 100));
-                table.get().setFillsViewportHeight(true);
 
                 //Adding JTable to panelMain
                 new CreateTable(panelMain, frame, table.get());
@@ -140,7 +135,12 @@ public class Swing_project {
 }
 
 class CreateTable {
-     CreateTable(JPanel panel, JFrame frame, JTable table) {
+    CreateTable(JPanel panel, JFrame frame, JTable table) {
+        table.getTableHeader().setReorderingAllowed(false);
+        table.setAutoCreateRowSorter(true);
+        table.setPreferredScrollableViewportSize(new Dimension(500, 100));
+        table.setFillsViewportHeight(true);
+
         panel.add(table.getTableHeader(), BorderLayout.PAGE_START);
         panel.add(table, BorderLayout.CENTER);
         JScrollPane scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
