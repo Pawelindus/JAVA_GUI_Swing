@@ -7,5 +7,10 @@ public class Swing_project {
 
     private static void CreateNewGUI() {
         JFrame frame = new JFrame();
+        JPanel panelMain = new JPanel();
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setContentPane(panelMain);
+        frame.setSize(500,500);
     }
 }
