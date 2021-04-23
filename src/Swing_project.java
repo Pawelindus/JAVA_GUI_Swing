@@ -37,6 +37,7 @@ public class Swing_project {
         JMenu menuTable = new JMenu("Table");
         JMenuItem openItem = new JMenuItem("Open File");
         JMenuItem saveItem = new JMenuItem("Save File");
+        JMenuItem newTableItem = new JMenuItem("New Table");
         JMenuItem addRowItem = new JMenuItem("Add Row");
         JMenuItem removeRowItem = new JMenuItem("Remove Row");
         frame.setJMenuBar(menuBar);
@@ -44,8 +45,10 @@ public class Swing_project {
         menuBar.add(menuTable);
         menuFile.add(openItem);
         menuFile.add(saveItem);
+        menuTable.add(newTableItem);
         menuTable.add(addRowItem);
         menuTable.add(removeRowItem);
+
 
         //OpenItem Section
         openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
@@ -80,20 +83,12 @@ public class Swing_project {
                 table.set(new JTable(new DefaultTableModel(data, columnNames)));
                 table.get().getTableHeader().setReorderingAllowed(false);
                 table.get().setAutoCreateRowSorter(true);
-                table.get().setPreferredScrollableViewportSize(new Dimension(500,100)) ;
+
+                table.get().setPreferredScrollableViewportSize(new Dimension(500, 100));
                 table.get().setFillsViewportHeight(true);
 
                 //Adding JTable to panelMain
-                panelMain.add(table.get().getTableHeader(), BorderLayout.PAGE_START);
-                panelMain.add(table.get(), BorderLayout.CENTER);
-                JScrollPane scrollPane = new JScrollPane(table.get(), ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-                scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-                scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-                frame.add(scrollPane);
-
-                panelMain.revalidate();
-                frame.revalidate();
-
+                new CreateTable(panelMain, frame, table.get());
             }
         });
 
@@ -101,19 +96,20 @@ public class Swing_project {
         saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
         saveItem.addActionListener(e -> {
             fileChooser.showSaveDialog(frame);
-            String option = fileChooser.getSelectedFile().getAbsolutePath();
-            File file = new File(option);
-            PrintStream fileStream = null;
-            try {
-                fileStream = new PrintStream(file);
-            } catch (FileNotFoundException fileNotFoundException) {
-                fileNotFoundException.printStackTrace();
+            if (fileChooser.getSelectedFile() != null) {
+                String option = fileChooser.getSelectedFile().getAbsolutePath();
+                File file = new File(option);
+                PrintStream fileStream = null;
+                try {
+                    fileStream = new PrintStream(file);
+                } catch (FileNotFoundException fileNotFoundException) {
+                    fileNotFoundException.printStackTrace();
+                }
+                for (int i = 0; i < table.get().getColumnCount() - 1; i++) {
+                    assert fileStream != null;
+                    fileStream.println(table.get().getModel().getValueAt(i, 0) + " " + table.get().getModel().getValueAt(i, 1) + " " + table.get().getModel().getValueAt(i, 2) + " " + table.get().getModel().getValueAt(i, 3));
+                }
             }
-            for (int i = 0; i < table.get().getColumnCount() - 1; i++) {
-                assert fileStream != null;
-                fileStream.println(table.get().getModel().getValueAt(i, 0) + " " + table.get().getModel().getValueAt(i, 1) + " " + table.get().getModel().getValueAt(i, 2) + " " + table.get().getModel().getValueAt(i, 3));
-            }
-
 
         });
 
@@ -132,6 +128,27 @@ public class Swing_project {
             }
         });
 
+        newTableItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
+        newTableItem.addActionListener(e -> {
+            panelMain.removeAll();
+            table.set(new JTable(new DefaultTableModel(new Object[][]{{"", "", "", "", ""}}, columnNames)));
+            new CreateTable(panelMain, frame, table.get());
+        });
 
+
+    }
+}
+
+class CreateTable {
+     CreateTable(JPanel panel, JFrame frame, JTable table) {
+        panel.add(table.getTableHeader(), BorderLayout.PAGE_START);
+        panel.add(table, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        frame.add(scrollPane);
+
+        panel.revalidate();
+        frame.revalidate();
     }
 }
