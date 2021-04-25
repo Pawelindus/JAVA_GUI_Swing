@@ -2,14 +2,14 @@ public class Employee {
     private String forename;
     private String surname;
     private Enum<Jobs> jobsEnum;
-    private int yearsOfWork;
-    private int salary;
+    private Integer yearsOfWork;
+    private Integer salary;
 
 
     public Employee() {
     }
 
-    public Employee(String forename, String surname, Enum<Jobs> jobsEnum, int yearsOfWork, int salary) {
+    public Employee(String forename, String surname, Enum<Jobs> jobsEnum, Integer yearsOfWork, Integer salary) {
         this.forename = forename;
         this.surname = surname;
         this.jobsEnum = jobsEnum;
@@ -42,7 +42,7 @@ public class Employee {
         this.jobsEnum = jobsEnum;
     }
 
-    public int getYearsOfWork() {
+    public Integer getYearsOfWork() {
         return yearsOfWork;
     }
 
@@ -50,7 +50,7 @@ public class Employee {
         this.yearsOfWork = yearsOfWork;
     }
 
-    public int getSalary() {
+    public Integer getSalary() {
         return salary;
     }
 

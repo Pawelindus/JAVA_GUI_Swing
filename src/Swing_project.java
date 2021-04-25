@@ -1,11 +1,14 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Swing_project {
@@ -17,7 +20,9 @@ public class Swing_project {
         JFrame frame = new JFrame();
         JPanel panelMain = new JPanel(new BorderLayout());
         JFileChooser fileChooser = new JFileChooser();
-        AtomicReference<JTable> table = new AtomicReference<>(new JTable(new DefaultTableModel()));
+        AtomicReference<DefaultTableModel> model = new AtomicReference<>(new DefaultTableModel());
+        AtomicReference<JTable> table = new AtomicReference<>(new JTable(model.get()));
+
 
         //Table Column Names
         String[] columnNames = {"Forename", "Surname", "Job position", "Years of work", "Salary"};
@@ -27,8 +32,8 @@ public class Swing_project {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(panelMain);
-        frame.setSize(500, 500);
-        panelMain.setPreferredSize(new Dimension(500, 500));
+        frame.setSize(700, 500);
+        panelMain.setPreferredSize(new Dimension(700, 500));
         panelMain.setBackground(Color.getHSBColor(12, 12, 12));
 
         //MenuBar Section
@@ -80,7 +85,8 @@ public class Swing_project {
                 }
 
                 //JTable creation
-                table.set(new JTable(new DefaultTableModel(data, columnNames)));
+                model.set(new DefaultTableModel(data, columnNames));
+                table.set(new JTable(model.get()));
 
                 //Adding JTable to panelMain
                 new CreateTable(panelMain, frame, table.get());
@@ -100,9 +106,16 @@ public class Swing_project {
                 } catch (FileNotFoundException fileNotFoundException) {
                     fileNotFoundException.printStackTrace();
                 }
-                for (int i = 0; i < table.get().getColumnCount() - 1; i++) {
-                    assert fileStream != null;
-                    fileStream.println(table.get().getModel().getValueAt(i, 0) + " " + table.get().getModel().getValueAt(i, 1) + " " + table.get().getModel().getValueAt(i, 2) + " " + table.get().getModel().getValueAt(i, 3));
+                for (int i = 0; i < table.get().getRowCount(); i++) {
+                    for (int j = 0; j < table.get().getColumnCount(); j++) {
+                        if (fileStream != null) {
+                            if (j == 4) {
+                                fileStream.print(table.get().getModel().getValueAt(i, j) + "\r\n");
+                            } else {
+                                fileStream.print(table.get().getModel().getValueAt(i, j) + " ");
+                            }
+                        }
+                    }
                 }
             }
 
@@ -110,23 +123,24 @@ public class Swing_project {
 
         addRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
         addRowItem.addActionListener(e -> {
-            DefaultTableModel model = (DefaultTableModel) table.get().getModel();
-            model.addRow(new Object[]{"", "", "", "", ""});
+            model.set((DefaultTableModel) table.get().getModel());
+            model.get().addRow(new Object[]{"", "", "", 0, 0});
         });
 
         removeRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         removeRowItem.addActionListener(e -> {
-            DefaultTableModel model = (DefaultTableModel) table.get().getModel();
+            // model = (DefaultTableModel) table.get().getModel();
             if (table.get().isRowSelected(table.get().getSelectedRow())) {
-
-                model.removeRow(table.get().getSelectedRow());
+                model.set((DefaultTableModel) table.get().getModel());
+                model.get().removeRow(table.get().getSelectedRow());
             }
         });
 
         newTableItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         newTableItem.addActionListener(e -> {
             panelMain.removeAll();
-            table.set(new JTable(new DefaultTableModel(new Object[][]{{"", "", "", "", ""}}, columnNames)));
+            model.set(new DefaultTableModel(new Object[][]{{"", "", "", 0, 0}}, columnNames));
+            table.set(new JTable(model.get()));
             new CreateTable(panelMain, frame, table.get());
         });
 
@@ -137,8 +151,7 @@ public class Swing_project {
 class CreateTable {
     CreateTable(JPanel panel, JFrame frame, JTable table) {
         table.getTableHeader().setReorderingAllowed(false);
-        table.setAutoCreateRowSorter(true);
-        table.setPreferredScrollableViewportSize(new Dimension(500, 100));
+        table.setPreferredScrollableViewportSize(new Dimension(700, 100));
         table.setFillsViewportHeight(true);
 
         panel.add(table.getTableHeader(), BorderLayout.PAGE_START);
@@ -147,6 +160,42 @@ class CreateTable {
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         frame.add(scrollPane);
+
+        TableRowSorter tableRowSorter = new TableRowSorter(table.getModel());
+
+        class IntComparator implements Comparator {
+            public int compare(Object o1, Object o2) {
+                Integer int1 = Integer.parseInt(o1.toString());
+                Integer int2 = Integer.parseInt(o2.toString());
+                return int1.compareTo(int2);
+            }
+        }
+        class StringComparator implements Comparator<String> {
+            public int compare(String o1, String o2) {
+                return o1.compareTo(o2);
+            }
+        }
+        class EnumComparator implements Comparator<Jobs> {
+            public int compare(Jobs o1, Jobs o2) {
+                return o1.compareTo(o2);
+            }
+        }
+        tableRowSorter.setComparator(0, new StringComparator());
+        tableRowSorter.setComparator(1, new StringComparator());
+        tableRowSorter.setComparator(2, new EnumComparator());
+        tableRowSorter.setComparator(3, new IntComparator());
+        tableRowSorter.setComparator(4, new IntComparator());
+        table.setRowSorter(tableRowSorter);
+
+        JComboBox<Jobs> comboBox = new JComboBox<>();
+        comboBox.addItem(Jobs.CEO);
+        comboBox.addItem(Jobs.ACCOUNTING);
+        comboBox.addItem(Jobs.MANAGER);
+        comboBox.addItem(Jobs.MARKETING);
+        comboBox.addItem(Jobs.QUALITY_CONTROL);
+        comboBox.addItem(Jobs.RECEPTIONIST);
+        TableColumn jobColumn = table.getColumnModel().getColumn(2);
+        jobColumn.setCellEditor(new DefaultCellEditor(comboBox));
 
         panel.revalidate();
         frame.revalidate();
