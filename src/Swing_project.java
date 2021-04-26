@@ -124,7 +124,7 @@ public class Swing_project {
         addRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
         addRowItem.addActionListener(e -> {
             model.set((DefaultTableModel) table.get().getModel());
-            model.get().addRow(new Object[]{"", "", "", 0, 0});
+            model.get().addRow(new Object[]{"", "", Jobs.NO_POSITION, 0, 0});
         });
 
         removeRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
@@ -139,7 +139,7 @@ public class Swing_project {
         newTableItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         newTableItem.addActionListener(e -> {
             panelMain.removeAll();
-            model.set(new DefaultTableModel(new Object[][]{{"", "", "", 0, 0}}, columnNames));
+            model.set(new DefaultTableModel(new Object[][]{{"", "", Jobs.NO_POSITION, 0, 0}}, columnNames));
             table.set(new JTable(model.get()));
             new CreateTable(panelMain, frame, table.get());
         });

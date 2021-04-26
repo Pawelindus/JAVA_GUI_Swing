@@ -4,7 +4,8 @@ public enum Jobs {
     ACCOUNTING("ACCOUNTING"),
     MARKETING("MARKETING"),
     QUALITY_CONTROL("QUALITY_CONTROL"),
-    RECEPTIONIST("RECEPTIONIST");
+    RECEPTIONIST("RECEPTIONIST"),
+    NO_POSITION("");
 
     private final String label;
 
