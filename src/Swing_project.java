@@ -1,10 +1,10 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -20,6 +20,9 @@ public class Swing_project {
         JFrame frame = new JFrame();
         JPanel panelMain = new JPanel(new BorderLayout());
         JFileChooser fileChooser = new JFileChooser();
+        JPanel panelFilter = new JPanel(new BorderLayout());
+        JTextField textField = new JTextField();
+        JButton buttonClrFilter = new JButton("Clear");
         AtomicReference<DefaultTableModel> model = new AtomicReference<>(new DefaultTableModel());
         AtomicReference<JTable> table = new AtomicReference<>(new JTable(model.get()));
 
@@ -28,13 +31,39 @@ public class Swing_project {
         String[] columnNames = {"Forename", "Surname", "Job position", "Years of work", "Salary"};
 
         //Frame and panelMain Section
-
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(panelMain);
         frame.setSize(700, 500);
         panelMain.setPreferredSize(new Dimension(700, 500));
         panelMain.setBackground(Color.getHSBColor(12, 12, 12));
+        panelMain.add(panelFilter, BorderLayout.PAGE_END);
+        panelFilter.add(textField, BorderLayout.CENTER);
+        panelFilter.add(buttonClrFilter, BorderLayout.LINE_END);
+
+        //TextField Section
+        textField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                new myRowFilter(table.get(), textField);
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                new myRowFilter(table.get(), textField);
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                new myRowFilter(table.get(), textField);
+            }
+        });
+
+        //Button Section
+        buttonClrFilter.addActionListener(e -> {
+            textField.setText("");
+            new myRowFilter(table.get(), textField);
+        });
 
         //MenuBar Section
         JMenuBar menuBar = new JMenuBar();
@@ -60,7 +89,7 @@ public class Swing_project {
         openItem.addActionListener(e -> {
             fileChooser.showOpenDialog(frame);
             if (fileChooser.getSelectedFile() != null) {
-                panelMain.removeAll();
+                panelMain.remove(table.get());
                 String option = fileChooser.getSelectedFile().getAbsolutePath();
                 GetFromTXT getFromTXT = new GetFromTXT();
                 int lines = getFromTXT.countFileLines(option);
@@ -129,7 +158,6 @@ public class Swing_project {
 
         removeRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         removeRowItem.addActionListener(e -> {
-            // model = (DefaultTableModel) table.get().getModel();
             if (table.get().isRowSelected(table.get().getSelectedRow())) {
                 model.set((DefaultTableModel) table.get().getModel());
                 model.get().removeRow(table.get().getSelectedRow());
@@ -138,12 +166,11 @@ public class Swing_project {
 
         newTableItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         newTableItem.addActionListener(e -> {
-            panelMain.removeAll();
+            panelMain.remove(table.get());
             model.set(new DefaultTableModel(new Object[][]{{"", "", Jobs.NO_POSITION, 0, 0}}, columnNames));
             table.set(new JTable(model.get()));
             new CreateTable(panelMain, frame, table.get());
         });
-
 
     }
 }
@@ -161,9 +188,9 @@ class CreateTable {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         frame.add(scrollPane);
 
-        TableRowSorter tableRowSorter = new TableRowSorter(table.getModel());
+        TableRowSorter<TableModel> tableRowSorter = new TableRowSorter<>(table.getModel());
 
-        class IntComparator implements Comparator {
+        class IntComparator implements Comparator<Object> {
             public int compare(Object o1, Object o2) {
                 Integer int1 = Integer.parseInt(o1.toString());
                 Integer int2 = Integer.parseInt(o2.toString());
@@ -186,7 +213,6 @@ class CreateTable {
         tableRowSorter.setComparator(3, new IntComparator());
         tableRowSorter.setComparator(4, new IntComparator());
         table.setRowSorter(tableRowSorter);
-
         JComboBox<Jobs> comboBox = new JComboBox<>();
         comboBox.addItem(Jobs.CEO);
         comboBox.addItem(Jobs.ACCOUNTING);
@@ -201,3 +227,28 @@ class CreateTable {
         frame.revalidate();
     }
 }
+
+class myRowFilter {
+    myRowFilter(JTable table, JTextField textField) {
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
+        table.setRowSorter(sorter);
+        RowFilter<TableModel, Object> rf;
+        try {
+            rf = RowFilter.regexFilter(textField.getText());
+        } catch (java.util.regex.PatternSyntaxException e) {
+            return;
+        }
+        if (!textField.getText().equals("") && table.getRowCount() != 0) {
+            table.setRowSelectionInterval(0, table.getRowCount() - 1);
+        }
+        sorter.setRowFilter(rf);
+    }
+}
+
+class numberRowFilter {
+    numberRowFilter(JTable table, JTextField textField) {
+
+    }
+}
+
+

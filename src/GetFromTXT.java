@@ -31,22 +31,22 @@ class GetFromTXT {
                     text += (char) i;
                 }
                 if (i == ' ' && spaceN == 2) {
-                    if (text.equals(Jobs.CEO.getLabel())) {
+                    if (text.equals(Jobs.CEO.name())) {
                         employees[j].setJobsEnum(Jobs.CEO);
                     }
-                    if (text.equals(Jobs.MANAGER.getLabel())) {
+                    if (text.equals(Jobs.MANAGER.name())) {
                         employees[j].setJobsEnum(Jobs.MANAGER);
                     }
-                    if (text.equals(Jobs.ACCOUNTING.getLabel())) {
+                    if (text.equals(Jobs.ACCOUNTING.name())) {
                         employees[j].setJobsEnum(Jobs.ACCOUNTING);
                     }
-                    if (text.equals(Jobs.MARKETING.getLabel())) {
+                    if (text.equals(Jobs.MARKETING.name())) {
                         employees[j].setJobsEnum(Jobs.MARKETING);
                     }
-                    if (text.equals(Jobs.QUALITY_CONTROL.getLabel())) {
+                    if (text.equals(Jobs.QUALITY_CONTROL.name())) {
                         employees[j].setJobsEnum(Jobs.QUALITY_CONTROL);
                     }
-                    if (text.equals(Jobs.RECEPTIONIST.getLabel())) {
+                    if (text.equals(Jobs.RECEPTIONIST.name())) {
                         employees[j].setJobsEnum(Jobs.RECEPTIONIST);
                     }
                 }
