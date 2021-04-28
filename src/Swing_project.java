@@ -4,10 +4,14 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,12 +25,18 @@ public class Swing_project {
         JPanel panelMain = new JPanel(new BorderLayout());
         JFileChooser fileChooser = new JFileChooser();
         JPanel panelFilter = new JPanel(new BorderLayout());
+        JPanel panelRadioBut = new JPanel();
         JTextField textField = new JTextField();
         JButton buttonClrFilter = new JButton("Clear");
+        JCheckBox forenameChBox = new JCheckBox("Forename");
+        JCheckBox surnameChBox = new JCheckBox("Surname");
+        JCheckBox jobChBox = new JCheckBox("Job");
+        JCheckBox yearsChBox = new JCheckBox("Years");
+        JCheckBox salaryChBox = new JCheckBox("Salary");
         AtomicReference<DefaultTableModel> model = new AtomicReference<>(new DefaultTableModel());
         AtomicReference<JTable> table = new AtomicReference<>(new JTable(model.get()));
 
-
+        JCheckBox[] checkBoxes = {forenameChBox, surnameChBox, jobChBox, yearsChBox, salaryChBox};
         //Table Column Names
         String[] columnNames = {"Forename", "Surname", "Job position", "Years of work", "Salary"};
 
@@ -37,33 +47,47 @@ public class Swing_project {
         frame.setSize(700, 500);
         panelMain.setPreferredSize(new Dimension(700, 500));
         panelMain.setBackground(Color.getHSBColor(12, 12, 12));
-        panelMain.add(panelFilter, BorderLayout.PAGE_END);
+
+        //panelFilter and panelRadioBut Section
+        //panelFilter.setPreferredSize(new Dimension(700, 300));
         panelFilter.add(textField, BorderLayout.CENTER);
         panelFilter.add(buttonClrFilter, BorderLayout.LINE_END);
+        panelFilter.add(panelRadioBut, BorderLayout.LINE_START);
+        panelRadioBut.add(forenameChBox);
+        panelRadioBut.add(surnameChBox);
+        panelRadioBut.add(jobChBox);
+        panelRadioBut.add(yearsChBox);
+        panelRadioBut.add(salaryChBox);
 
         //TextField Section
         textField.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                new myRowFilter(table.get(), textField);
+                new myRowFilter(table.get(), textField, checkBoxes);
             }
 
             @Override
             public void keyPressed(KeyEvent e) {
-                new myRowFilter(table.get(), textField);
+                new myRowFilter(table.get(), textField, checkBoxes);
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                new myRowFilter(table.get(), textField);
+                new myRowFilter(table.get(), textField, checkBoxes);
             }
         });
 
-        //Button Section
+
+        //Button and RadioButton Section
         buttonClrFilter.addActionListener(e -> {
             textField.setText("");
-            new myRowFilter(table.get(), textField);
+            new myRowFilter(table.get(), textField, checkBoxes);
         });
+        ActionListener refreshRowListener = e -> new myRowFilter(table.get(), textField, checkBoxes);
+        for (int i = 0; i < 5; i++) {
+            checkBoxes[i].addActionListener(refreshRowListener);
+        }
+
 
         //MenuBar Section
         JMenuBar menuBar = new JMenuBar();
@@ -89,7 +113,7 @@ public class Swing_project {
         openItem.addActionListener(e -> {
             fileChooser.showOpenDialog(frame);
             if (fileChooser.getSelectedFile() != null) {
-                panelMain.remove(table.get());
+                panelMain.removeAll();
                 String option = fileChooser.getSelectedFile().getAbsolutePath();
                 GetFromTXT getFromTXT = new GetFromTXT();
                 int lines = getFromTXT.countFileLines(option);
@@ -119,6 +143,7 @@ public class Swing_project {
 
                 //Adding JTable to panelMain
                 new CreateTable(panelMain, frame, table.get());
+                panelMain.add(panelFilter, BorderLayout.PAGE_END);
             }
         });
 
@@ -166,10 +191,11 @@ public class Swing_project {
 
         newTableItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         newTableItem.addActionListener(e -> {
-            panelMain.remove(table.get());
+            panelMain.removeAll();
             model.set(new DefaultTableModel(new Object[][]{{"", "", Jobs.NO_POSITION, 0, 0}}, columnNames));
             table.set(new JTable(model.get()));
             new CreateTable(panelMain, frame, table.get());
+            panelMain.add(panelFilter, BorderLayout.PAGE_END);
         });
 
     }
@@ -229,16 +255,32 @@ class CreateTable {
 }
 
 class myRowFilter {
-    myRowFilter(JTable table, JTextField textField) {
+    myRowFilter(JTable table, JTextField textField, JCheckBox[] checkBoxes) {
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
         table.setRowSorter(sorter);
         RowFilter<TableModel, Object> rf;
         try {
-            rf = RowFilter.regexFilter(textField.getText());
+            ArrayList<Integer> list = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                if (checkBoxes[i].isSelected()) {
+                    list.add(i);
+                }
+            }
+            int[] tab = new int[list.size()];
+            for (int i = 0; i < list.size(); i++) {
+                tab[i] = list.get(i);
+            }
+            if (tab.length != 0) {
+                rf = RowFilter.regexFilter(textField.getText(), tab);
+            } else {
+                rf = RowFilter.regexFilter(textField.getText());
+            }
+
         } catch (java.util.regex.PatternSyntaxException e) {
             return;
         }
         if (!textField.getText().equals("") && table.getRowCount() != 0) {
+
             table.setRowSelectionInterval(0, table.getRowCount() - 1);
         }
         sorter.setRowFilter(rf);
