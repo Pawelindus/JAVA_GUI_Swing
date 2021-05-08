@@ -111,8 +111,8 @@ public class Swing_project {
         //OpenItem Section
         openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
         openItem.addActionListener(e -> {
-            fileChooser.showOpenDialog(frame);
-            if (fileChooser.getSelectedFile() != null) {
+            int info = fileChooser.showOpenDialog(frame);
+            if (fileChooser.getSelectedFile() != null && info == JFileChooser.APPROVE_OPTION) {
                 panelMain.removeAll();
                 String option = fileChooser.getSelectedFile().getAbsolutePath();
                 GetFromTXT getFromTXT = new GetFromTXT();
@@ -150,8 +150,8 @@ public class Swing_project {
         //SaveItem Section
         saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
         saveItem.addActionListener(e -> {
-            fileChooser.showSaveDialog(frame);
-            if (fileChooser.getSelectedFile() != null) {
+            int info = fileChooser.showOpenDialog(frame);
+            if (fileChooser.getSelectedFile() != null && info == JFileChooser.APPROVE_OPTION) {
                 String option = fileChooser.getSelectedFile().getAbsolutePath();
                 File file = new File(option);
                 PrintStream fileStream = null;
