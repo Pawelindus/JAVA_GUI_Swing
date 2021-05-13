@@ -9,6 +9,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import javax.swing.filechooser.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -37,6 +38,21 @@ public class Swing_project {
         AtomicReference<JTable> table = new AtomicReference<>(new JTable(model.get()));
 
         JCheckBox[] checkBoxes = {forenameChBox, surnameChBox, jobChBox, yearsChBox, salaryChBox};
+
+        FileFilter employeeFilter = new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.getName().endsWith(".empl");
+            }
+
+            @Override
+            public String getDescription() {
+                return ".empl";
+            }
+        };
+        fileChooser.setFileFilter(employeeFilter);
+
+
         //Table Column Names
         String[] columnNames = {"Forename", "Surname", "Job position", "Years of work", "Salary"};
 
@@ -48,7 +64,6 @@ public class Swing_project {
         panelMain.setPreferredSize(new Dimension(700, 500));
         panelMain.setBackground(Color.getHSBColor(12, 12, 12));
 
-        //panelFilter and panelRadioBut Section
         //panelFilter.setPreferredSize(new Dimension(700, 300));
         panelFilter.add(textField, BorderLayout.CENTER);
         panelFilter.add(buttonClrFilter, BorderLayout.LINE_END);
@@ -63,7 +78,12 @@ public class Swing_project {
         textField.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                new myRowFilter(table.get(), textField, checkBoxes);
+                // TODO: 13.05.2021
+                if (textField.getText().equals(">")) {
+                    new myNumberRowFilter(table.get(), textField);
+                } else {
+                    new myRowFilter(table.get(), textField, checkBoxes);
+                }
             }
 
             @Override
@@ -83,6 +103,7 @@ public class Swing_project {
             textField.setText("");
             new myRowFilter(table.get(), textField, checkBoxes);
         });
+
         ActionListener refreshRowListener = e -> new myRowFilter(table.get(), textField, checkBoxes);
         for (int i = 0; i < 5; i++) {
             checkBoxes[i].addActionListener(refreshRowListener);
@@ -113,47 +134,58 @@ public class Swing_project {
         openItem.addActionListener(e -> {
             int info = fileChooser.showOpenDialog(frame);
             if (fileChooser.getSelectedFile() != null && info == JFileChooser.APPROVE_OPTION) {
-                panelMain.removeAll();
-                String option = fileChooser.getSelectedFile().getAbsolutePath();
-                GetFromTXT getFromTXT = new GetFromTXT();
-                int lines = getFromTXT.countFileLines(option);
-                Employee[] employees = getFromTXT.getFromFile(option, lines);
+                if (fileChooser.getSelectedFile().getName().endsWith(".empl")) {
+                    panelMain.removeAll();
+                    String option = fileChooser.getSelectedFile().getAbsolutePath();
+                    GetFromTXT getFromTXT = new GetFromTXT();
+                    int lines = getFromTXT.countFileLines(option);
+                    Employee[] employees = getFromTXT.getFromFile(option, lines);
 
-                //Data for JTable
-                Object[][] data = new Object[lines][5];
-                for (int i = 0; i < lines; i++) {
-                    for (int j = 0; j < 5; j++) {
-                        if (j == 0) {
-                            data[i][j] = employees[i].getForename();
-                        } else if (j == 1) {
-                            data[i][j] = employees[i].getSurname();
-                        } else if (j == 2) {
-                            data[i][j] = employees[i].getJobsEnum();
-                        } else if (j == 3) {
-                            data[i][j] = employees[i].getYearsOfWork();
-                        } else {
-                            data[i][j] = employees[i].getSalary();
+                    //Data for JTable
+                    Object[][] data = new Object[lines][5];
+                    for (int i = 0; i < lines; i++) {
+                        for (int j = 0; j < 5; j++) {
+                            if (j == 0) {
+                                data[i][j] = employees[i].getForename();
+                            } else if (j == 1) {
+                                data[i][j] = employees[i].getSurname();
+                            } else if (j == 2) {
+                                data[i][j] = employees[i].getJobsEnum();
+                            } else if (j == 3) {
+                                data[i][j] = employees[i].getYearsOfWork();
+                            } else {
+                                data[i][j] = employees[i].getSalary();
+                            }
                         }
                     }
+
+                    //JTable creation
+                    model.set(new DefaultTableModel(data, columnNames));
+                    table.set(new JTable(model.get()));
+
+                    //Adding JTable to panelMain
+                    new CreateTable(panelMain, frame, table.get());
+                    panelMain.add(panelFilter, BorderLayout.PAGE_END);
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Wybierz właściwy format pliku.");
+
                 }
-
-                //JTable creation
-                model.set(new DefaultTableModel(data, columnNames));
-                table.set(new JTable(model.get()));
-
-                //Adding JTable to panelMain
-                new CreateTable(panelMain, frame, table.get());
-                panelMain.add(panelFilter, BorderLayout.PAGE_END);
             }
         });
 
         //SaveItem Section
         saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
         saveItem.addActionListener(e -> {
-            int info = fileChooser.showOpenDialog(frame);
-            if (fileChooser.getSelectedFile() != null && info == JFileChooser.APPROVE_OPTION) {
+            int info = fileChooser.showSaveDialog(frame);
+            if (info == JFileChooser.APPROVE_OPTION) {
                 String option = fileChooser.getSelectedFile().getAbsolutePath();
-                File file = new File(option);
+                String filename;
+                if (fileChooser.getSelectedFile().getName().endsWith(".empl")) {
+                    filename = option;
+                } else {
+                    filename = (option + ".empl");
+                }
+                File file = new File(filename);
                 PrintStream fileStream = null;
                 try {
                     fileStream = new PrintStream(file);
@@ -180,12 +212,13 @@ public class Swing_project {
             model.set((DefaultTableModel) table.get().getModel());
             model.get().addRow(new Object[]{"", "", Jobs.NO_POSITION, 0, 0});
         });
-
+        table.get().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         removeRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         removeRowItem.addActionListener(e -> {
-            if (table.get().isRowSelected(table.get().getSelectedRow())) {
-                model.set((DefaultTableModel) table.get().getModel());
-                model.get().removeRow(table.get().getSelectedRow());
+            int row = table.get().getSelectedRow();
+            if (row != -1) {
+                row = table.get().convertRowIndexToModel(row);
+                model.get().removeRow(row);
             }
         });
 
@@ -287,9 +320,17 @@ class myRowFilter {
     }
 }
 
-class numberRowFilter {
-    numberRowFilter(JTable table, JTextField textField) {
-
+// TODO: 08.05.2021  
+class myNumberRowFilter {
+    myNumberRowFilter(JTable table, JTextField textField) {
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
+        table.setRowSorter(sorter);
+        if (textField.getText().equals(">")) {
+            textField.setText(textField.getText().replaceFirst(">", ""));
+            if (!textField.getText().equals("")) {
+                sorter.setRowFilter(RowFilter.numberFilter(RowFilter.ComparisonType.AFTER, Integer.parseInt(textField.getText())));
+            }
+        }
     }
 }
 
