@@ -78,22 +78,17 @@ public class Swing_project {
         textField.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                // TODO: 13.05.2021
-                if (textField.getText().equals(">")) {
-                    new myNumberRowFilter(table.get(), textField);
-                } else {
-                    new myRowFilter(table.get(), textField, checkBoxes);
-                }
+                KeyboardClicked(textField, table.get(), checkBoxes);
             }
 
             @Override
             public void keyPressed(KeyEvent e) {
-                new myRowFilter(table.get(), textField, checkBoxes);
+                KeyboardClicked(textField, table.get(), checkBoxes);
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                new myRowFilter(table.get(), textField, checkBoxes);
+                KeyboardClicked(textField, table.get(), checkBoxes);
             }
         });
 
@@ -232,6 +227,18 @@ public class Swing_project {
         });
 
     }
+
+    private static void KeyboardClicked(JTextField textField, JTable table, JCheckBox[] checkBoxes ){
+        if (textField.getText().length() >= 1) {
+            if (textField.getText().charAt(0) != '>') {
+                new myRowFilter(table, textField, checkBoxes);
+            } else  if (textField.getText().charAt(0) == '>') {
+                new myNumberRowFilter(table, textField);
+            }
+        } else {
+            new myRowFilter(table, textField, checkBoxes);
+        }
+    }
 }
 
 class CreateTable {
@@ -325,10 +332,16 @@ class myNumberRowFilter {
     myNumberRowFilter(JTable table, JTextField textField) {
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
         table.setRowSorter(sorter);
-        if (textField.getText().equals(">")) {
-            textField.setText(textField.getText().replaceFirst(">", ""));
-            if (!textField.getText().equals("")) {
-                sorter.setRowFilter(RowFilter.numberFilter(RowFilter.ComparisonType.AFTER, Integer.parseInt(textField.getText())));
+        String value = "";
+        if (textField.getText().charAt(0) == '>' && textField.getText().length() > 1) {
+            for (int i = 0; i < textField.getText().length(); i++) {
+                if (Character.isDigit(textField.getText().charAt(i))) {
+                    try {
+                        value = value + textField.getText().charAt(i);
+                        sorter.setRowFilter(RowFilter.numberFilter(RowFilter.ComparisonType.AFTER, Integer.parseInt(value), 4));
+                    } catch (Exception e){textField.setText("");
+                        JOptionPane.showMessageDialog(table, "Podana liczba jest zbyt duża (Integer.MAX_VALUE)");}
+                }
             }
         }
     }
