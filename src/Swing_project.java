@@ -230,9 +230,9 @@ public class Swing_project {
 
     private static void KeyboardClicked(JTextField textField, JTable table, JCheckBox[] checkBoxes ){
         if (textField.getText().length() >= 1) {
-            if (textField.getText().charAt(0) != '>') {
+            if (textField.getText().charAt(0) != '>' && textField.getText().charAt(0) != '<') {
                 new myRowFilter(table, textField, checkBoxes);
-            } else  if (textField.getText().charAt(0) == '>') {
+            } else if (textField.getText().charAt(0) == '>' || textField.getText().charAt(0) == '<') {
                 new myNumberRowFilter(table, textField);
             }
         } else {
@@ -344,6 +344,18 @@ class myNumberRowFilter {
                 }
             }
         }
+        if (textField.getText().charAt(0) == '<' && textField.getText().length() > 1) {
+            for (int i = 0; i < textField.getText().length(); i++) {
+                if (Character.isDigit(textField.getText().charAt(i))) {
+                    try {
+                        value = value + textField.getText().charAt(i);
+                        sorter.setRowFilter(RowFilter.numberFilter(RowFilter.ComparisonType.BEFORE, Integer.parseInt(value), 4));
+                    } catch (Exception e){textField.setText("");
+                        JOptionPane.showMessageDialog(table, "Podana liczba jest zbyt duża (Integer.MAX_VALUE)");}
+                }
+            }
+        }
+
     }
 }
 
