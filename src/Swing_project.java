@@ -1,13 +1,12 @@
 import javax.swing.*;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 import java.io.FileNotFoundException;
@@ -39,6 +38,7 @@ public class Swing_project {
 
         JCheckBox[] checkBoxes = {forenameChBox, surnameChBox, jobChBox, yearsChBox, salaryChBox};
 
+        //fileChooser Filter
         FileFilter employeeFilter = new FileFilter() {
             @Override
             public boolean accept(File f) {
@@ -52,7 +52,6 @@ public class Swing_project {
         };
         fileChooser.setFileFilter(employeeFilter);
 
-
         //Table Column Names
         String[] columnNames = {"Forename", "Surname", "Job position", "Years of work", "Salary"};
 
@@ -62,6 +61,7 @@ public class Swing_project {
         frame.setContentPane(panelMain);
         frame.setSize(700, 500);
         panelMain.setPreferredSize(new Dimension(700, 500));
+        // TODO: 16.05.2021 COLOR CHANGE DIALOG
         panelMain.setBackground(Color.getHSBColor(12, 12, 12));
 
         //panelFilter.setPreferredSize(new Dimension(700, 300));
@@ -73,6 +73,21 @@ public class Swing_project {
         panelRadioBut.add(jobChBox);
         panelRadioBut.add(yearsChBox);
         panelRadioBut.add(salaryChBox);
+
+        //CheckIfSalaryGood Timer
+        Timer timer = new Timer(100, e -> CheckIfSalaryGood(table.get()));
+        timer.start();
+        table.get().getDefaultEditor(String.class).addCellEditorListener(new CellEditorListener() {
+            @Override
+            public void editingStopped(ChangeEvent e) {
+
+            }
+
+            @Override
+            public void editingCanceled(ChangeEvent e) {
+
+            }
+        });
 
         //TextField Section
         textField.addKeyListener(new KeyListener() {
@@ -92,18 +107,20 @@ public class Swing_project {
             }
         });
 
-
         //Button and RadioButton Section
-        buttonClrFilter.addActionListener(e -> {
+        buttonClrFilter.addActionListener(e ->
+
+        {
             textField.setText("");
             new myRowFilter(table.get(), textField, checkBoxes);
         });
 
         ActionListener refreshRowListener = e -> new myRowFilter(table.get(), textField, checkBoxes);
-        for (int i = 0; i < 5; i++) {
+        for (
+                int i = 0;
+                i < 5; i++) {
             checkBoxes[i].addActionListener(refreshRowListener);
         }
-
 
         //MenuBar Section
         JMenuBar menuBar = new JMenuBar();
@@ -155,7 +172,26 @@ public class Swing_project {
                     }
 
                     //JTable creation
-                    model.set(new DefaultTableModel(data, columnNames));
+                    model.set(new DefaultTableModel(data, columnNames) {
+                        @Override
+                        public Class<?> getColumnClass(int columnIndex) {
+                            if (columnIndex == 0) {
+                                return String.class;
+                            }
+                            if (columnIndex == 1) {
+                                return String.class;
+                            }
+                            if (columnIndex == 2) {
+                                return Enum.class;
+                            }
+                            if (columnIndex == 3) {
+                                return Integer.class;
+                            }
+                            if (columnIndex == 4) {
+                                return Integer.class;
+                            } else return String.class;
+                        }
+                    });
                     table.set(new JTable(model.get()));
 
                     //Adding JTable to panelMain
@@ -163,7 +199,6 @@ public class Swing_project {
                     panelMain.add(panelFilter, BorderLayout.PAGE_END);
                 } else {
                     JOptionPane.showMessageDialog(frame, "Wybierz właściwy format pliku.");
-
                 }
             }
         });
@@ -207,7 +242,10 @@ public class Swing_project {
             model.set((DefaultTableModel) table.get().getModel());
             model.get().addRow(new Object[]{"", "", Jobs.NO_POSITION, 0, 0});
         });
-        table.get().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        table.get().
+
+                setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         removeRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         removeRowItem.addActionListener(e -> {
             int row = table.get().getSelectedRow();
@@ -220,15 +258,33 @@ public class Swing_project {
         newTableItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         newTableItem.addActionListener(e -> {
             panelMain.removeAll();
-            model.set(new DefaultTableModel(new Object[][]{{"", "", Jobs.NO_POSITION, 0, 0}}, columnNames));
+            model.set(new DefaultTableModel(new Object[][]{{"", "", Jobs.NO_POSITION, 0, 0}}, columnNames){
+                @Override
+                public Class<?> getColumnClass(int columnIndex) {
+                    if (columnIndex == 0) {
+                        return String.class;
+                    }
+                    if (columnIndex == 1) {
+                        return String.class;
+                    }
+                    if (columnIndex == 2) {
+                        return Enum.class;
+                    }
+                    if (columnIndex == 3) {
+                        return Integer.class;
+                    }
+                    if (columnIndex == 4) {
+                        return Integer.class;
+                    } else return String.class;
+                }
+            });
             table.set(new JTable(model.get()));
             new CreateTable(panelMain, frame, table.get());
             panelMain.add(panelFilter, BorderLayout.PAGE_END);
         });
-
     }
 
-    private static void KeyboardClicked(JTextField textField, JTable table, JCheckBox[] checkBoxes ){
+    private static void KeyboardClicked(JTextField textField, JTable table, JCheckBox[] checkBoxes) {
         if (textField.getText().length() >= 1) {
             if (textField.getText().charAt(0) != '>' && textField.getText().charAt(0) != '<') {
                 new myRowFilter(table, textField, checkBoxes);
@@ -239,7 +295,41 @@ public class Swing_project {
             new myRowFilter(table, textField, checkBoxes);
         }
     }
+
+    private static void CheckIfSalaryGood(JTable table) {
+        for (int i = 0; i < table.getRowCount(); i++) {
+            Jobs jobsEnum = Jobs.NO_POSITION;
+            if (table.getValueAt(i, 2).equals(Jobs.CEO)) {
+                jobsEnum = Jobs.CEO;
+            }
+            if (table.getValueAt(i, 2).equals(Jobs.MANAGER)) {
+                jobsEnum = Jobs.MANAGER;
+            }
+            if (table.getValueAt(i, 2).equals(Jobs.ACCOUNTING)) {
+                jobsEnum = Jobs.ACCOUNTING;
+            }
+            if (table.getValueAt(i, 2).equals(Jobs.MARKETING)) {
+                jobsEnum = Jobs.MARKETING;
+            }
+            if (table.getValueAt(i, 2).equals(Jobs.QUALITY_CONTROL)) {
+                jobsEnum = Jobs.QUALITY_CONTROL;
+            }
+            if (table.getValueAt(i, 2).equals(Jobs.RECEPTIONIST)) {
+                jobsEnum = Jobs.RECEPTIONIST;
+            }
+            if (Integer.parseInt(table.getValueAt(i, 4).toString()) < jobsEnum.getMin()) {
+                table.setValueAt(jobsEnum.getMin(), i, 4);
+                JOptionPane.showMessageDialog(table, "Zbyt mała wartość pensji w rzędzie: " + i);
+            }
+            if (Integer.parseInt(table.getValueAt(i, 4).toString()) > jobsEnum.getMax()) {
+                table.setValueAt(jobsEnum.getMax(), i, 4);
+                JOptionPane.showMessageDialog(table, "Zbyt duża wartość pensji w rzędzie: " + i);
+            }
+        }
+
+    }
 }
+
 
 class CreateTable {
     CreateTable(JPanel panel, JFrame frame, JTable table) {
@@ -327,7 +417,6 @@ class myRowFilter {
     }
 }
 
-// TODO: 08.05.2021  
 class myNumberRowFilter {
     myNumberRowFilter(JTable table, JTextField textField) {
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
@@ -339,8 +428,10 @@ class myNumberRowFilter {
                     try {
                         value = value + textField.getText().charAt(i);
                         sorter.setRowFilter(RowFilter.numberFilter(RowFilter.ComparisonType.AFTER, Integer.parseInt(value), 4));
-                    } catch (Exception e){textField.setText("");
-                        JOptionPane.showMessageDialog(table, "Podana liczba jest zbyt duża (Integer.MAX_VALUE)");}
+                    } catch (Exception e) {
+                        textField.setText("");
+                        JOptionPane.showMessageDialog(table, "Podana liczba jest zbyt duża (Integer.MAX_VALUE)");
+                    }
                 }
             }
         }
@@ -350,8 +441,10 @@ class myNumberRowFilter {
                     try {
                         value = value + textField.getText().charAt(i);
                         sorter.setRowFilter(RowFilter.numberFilter(RowFilter.ComparisonType.BEFORE, Integer.parseInt(value), 4));
-                    } catch (Exception e){textField.setText("");
-                        JOptionPane.showMessageDialog(table, "Podana liczba jest zbyt duża (Integer.MAX_VALUE)");}
+                    } catch (Exception e) {
+                        textField.setText("");
+                        JOptionPane.showMessageDialog(table, "Podana liczba jest zbyt duża (Integer.MAX_VALUE)");
+                    }
                 }
             }
         }

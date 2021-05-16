@@ -7,8 +7,8 @@ public enum Jobs {
     RECEPTIONIST(3400, 6400),
     NO_POSITION(0,0);
 
-     private final int min;
-     private final int max;
+     private int min;
+     private int max;
     Jobs(int min, int max){
         this.min = min;
         this.max = max;
