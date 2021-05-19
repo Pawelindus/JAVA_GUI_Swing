@@ -49,6 +49,9 @@ class GetFromTXT {
                     if (text.equals(Jobs.RECEPTIONIST.name())) {
                         employees[j].setJobsEnum(Jobs.RECEPTIONIST);
                     }
+                    if (text.equals(Jobs.EMPTY.name())) {
+                        employees[j].setJobsEnum(Jobs.EMPTY);
+                    }
                 }
                 if (spaceN == 3 && i != ' ') {
                     text += (char) i;

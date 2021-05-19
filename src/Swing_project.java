@@ -1,14 +1,15 @@
 import javax.swing.*;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
-import javax.swing.filechooser.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -77,17 +78,6 @@ public class Swing_project {
         //CheckIfSalaryGood Timer
         Timer timer = new Timer(100, e -> CheckIfSalaryGood(table.get()));
         timer.start();
-        table.get().getDefaultEditor(String.class).addCellEditorListener(new CellEditorListener() {
-            @Override
-            public void editingStopped(ChangeEvent e) {
-
-            }
-
-            @Override
-            public void editingCanceled(ChangeEvent e) {
-
-            }
-        });
 
         //TextField Section
         textField.addKeyListener(new KeyListener() {
@@ -240,7 +230,7 @@ public class Swing_project {
         addRowItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
         addRowItem.addActionListener(e -> {
             model.set((DefaultTableModel) table.get().getModel());
-            model.get().addRow(new Object[]{"", "", Jobs.NO_POSITION, 0, 0});
+            model.get().addRow(new Object[]{"", "", Jobs.EMPTY, 0, 0});
         });
 
         table.get().
@@ -258,7 +248,7 @@ public class Swing_project {
         newTableItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         newTableItem.addActionListener(e -> {
             panelMain.removeAll();
-            model.set(new DefaultTableModel(new Object[][]{{"", "", Jobs.NO_POSITION, 0, 0}}, columnNames){
+            model.set(new DefaultTableModel(new Object[][]{{"", "", Jobs.EMPTY, 0, 0}}, columnNames){
                 @Override
                 public Class<?> getColumnClass(int columnIndex) {
                     if (columnIndex == 0) {
@@ -298,7 +288,7 @@ public class Swing_project {
 
     private static void CheckIfSalaryGood(JTable table) {
         for (int i = 0; i < table.getRowCount(); i++) {
-            Jobs jobsEnum = Jobs.NO_POSITION;
+            Jobs jobsEnum = Jobs.EMPTY;
             if (table.getValueAt(i, 2).equals(Jobs.CEO)) {
                 jobsEnum = Jobs.CEO;
             }

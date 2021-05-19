@@ -5,7 +5,7 @@ public enum Jobs {
     MARKETING(3500, 7000),
     QUALITY_CONTROL(4200, 8000),
     RECEPTIONIST(3400, 6400),
-    NO_POSITION(0,0);
+    EMPTY(0,0);
 
      private int min;
      private int max;
