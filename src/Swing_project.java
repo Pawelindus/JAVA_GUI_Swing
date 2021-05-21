@@ -9,6 +9,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Swing_project {
@@ -32,6 +33,11 @@ public class Swing_project {
         AtomicReference<DefaultTableModel> model = new AtomicReference<>(new DefaultTableModel());
         AtomicReference<JTable> table = new AtomicReference<>(new JTable(model.get()));
 
+        //Eliminate bug with AddRow
+        Object[][] data0 = {{}};
+        String[] names0 = {};
+        model.set(new DefaultTableModel(data0, names0));
+
         JCheckBox[] checkBoxes = {forenameChBox, surnameChBox, jobChBox, yearsChBox, salaryChBox};
 
         //fileChooser Filter
@@ -52,12 +58,16 @@ public class Swing_project {
         String[] columnNames = {"Forename", "Surname", "Job position", "Years of work", "Salary"};
 
         //Frame and panelMain Section
-        frame.setVisible(true);
+        frame.pack();
+        frame.setIconImage(new ImageIcon("excel-chart.png").getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(panelMain);
         frame.setSize(700, 500);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
         panelMain.setPreferredSize(new Dimension(700, 500));
 
+        //panelMain BG Color Change
         ReadFromSettings rfs = new ReadFromSettings();
         panelMain.setBackground(new Color(rfs.getRedL(), rfs.getGreenL(), rfs.getBlueL()));
 
@@ -113,6 +123,7 @@ public class Swing_project {
         JMenu menuFile = new JMenu("File");
         JMenu menuTable = new JMenu("Table");
         JMenu menuWindow = new JMenu("Window");
+        JMenu menuGenerator = new JMenu("Generator");
         JMenuItem openItem = new JMenuItem("Open File");
         JMenuItem saveItem = new JMenuItem("Save File");
         JMenuItem newTableItem = new JMenuItem("New Table");
@@ -120,10 +131,12 @@ public class Swing_project {
         JMenuItem removeRowItem = new JMenuItem("Remove Row");
         JMenuItem destroyTableItem = new JMenuItem("Destroy Table");
         JMenuItem changeColorItem = new JMenuItem("Change Bg Color");
+        JMenuItem generateItem = new JMenuItem("Generate Table");
         frame.setJMenuBar(menuBar);
         menuBar.add(menuFile);
         menuBar.add(menuTable);
         menuBar.add(menuWindow);
+        menuBar.add(menuGenerator);
         menuFile.add(openItem);
         menuFile.add(saveItem);
         menuTable.add(newTableItem);
@@ -131,6 +144,7 @@ public class Swing_project {
         menuTable.add(removeRowItem);
         menuTable.add(destroyTableItem);
         menuWindow.add(changeColorItem);
+        menuGenerator.add(generateItem);
 
 
         //OpenItem Section
@@ -285,10 +299,13 @@ public class Swing_project {
             panel.add(scrollBarGreen);
             panel.add(scrollBarBlue);
 
-            dialog.setVisible(true);
+            dialog.pack();
             dialog.setContentPane(panel);
             dialog.setSize(new Dimension(300, 200));
             dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+
 
             scrollBarRed.setBackground(Color.red);
             scrollBarGreen.setBackground(Color.green);
@@ -357,11 +374,42 @@ public class Swing_project {
                 }
             });
         });
-        destroyTableItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.CTRL_DOWN_MASK));
+        destroyTableItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
         destroyTableItem.addActionListener(e -> {
             panelMain.removeAll();
             panelMain.repaint();
             panelMain.revalidate();
+        });
+
+        generateItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK));
+        generateItem.addActionListener(e -> {
+            panelMain.removeAll();
+            model.set(new DefaultTableModel(new GenerateRandomEmployees().generateEmployees(), columnNames) {
+                @Override
+                public Class<?> getColumnClass(int columnIndex) {
+                    if (columnIndex == 0) {
+                        return String.class;
+                    }
+                    if (columnIndex == 1) {
+                        return String.class;
+                    }
+                    if (columnIndex == 2) {
+                        return Enum.class;
+                    }
+                    if (columnIndex == 3) {
+                        return Integer.class;
+                    }
+                    if (columnIndex == 4) {
+                        return Integer.class;
+                    } else return String.class;
+                }
+            });
+            table.set(new JTable(model.get()));
+
+            //Adding JTable to panelMain
+            new CreateTable(panelMain, frame, table.get());
+            panelMain.add(panelFilter, BorderLayout.PAGE_END);
+
         });
     }
 
@@ -407,7 +455,7 @@ public class Swing_project {
                 if (Integer.parseInt(table.getValueAt(i, 4).toString()) > jobsEnum.getMax()) {
                     table.setValueAt(jobsEnum.getMax(), i, 4);
                     int finalI = i;
-                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Zbyt duża wartość pensji w rzędzie: " + finalI, "Błąd wartość pensji", JOptionPane.INFORMATION_MESSAGE));
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Zbyt duża wartość pensji w rzędzie: " + finalI, "Błąd wartości pensji", JOptionPane.INFORMATION_MESSAGE));
                 }
             }
         } catch (Exception e) {
@@ -656,6 +704,8 @@ class CreateTable {
         TableColumn jobColumn = table.getColumnModel().getColumn(2);
         jobColumn.setCellEditor(new DefaultCellEditor(comboBox));
 
+        table.repaint();
+        table.revalidate();
         panel.revalidate();
         frame.revalidate();
     }
@@ -786,6 +836,48 @@ class ReadFromSettings {
 
     public int getBlueL() {
         return blueL;
+    }
+}
+
+class GenerateRandomEmployees {
+
+    Object[][] generateEmployees() {
+        //Generating Employees
+        Random random = new Random();
+        int lines = random.nextInt(10) + 5;
+        String[] names = {"Kasia", "Michał", "Aleksandra", "Tomasz", "Paweł", "Marek", "Amelia", "Zuzanna", "Kamil", "Dariusz", "Piotr"};
+        String[] surnames = {"Kowal", "Kruk", "Pączek", "Pietruszka", "Antos", "Czech", "Danielak", "Dziadosz", "Frąc", "Kwiek", "Malak"};
+        Object[] jobsObj = {Jobs.CEO, Jobs.ACCOUNTING, Jobs.MANAGER, Jobs.MARKETING, Jobs.QUALITY_CONTROL, Jobs.RECEPTIONIST};
+        Employee[] employees = new Employee[lines];
+        for (int i = 0; i < employees.length; i++) {
+            employees[i] = new Employee();
+        }
+        for (int i = 0; i < lines; i++) {
+            employees[i].setForename(names[random.nextInt(names.length)]);
+            employees[i].setSurname(surnames[random.nextInt(names.length)]);
+            employees[i].setJobsEnum((Enum<Jobs>) jobsObj[random.nextInt(6)]);
+            employees[i].setSalary(random.nextInt(12000));
+            employees[i].setYearsOfWork(random.nextInt(30));
+        }
+
+        //Data for JTable
+        Object[][] data = new Object[lines][5];
+        for (int i = 0; i < lines; i++) {
+            for (int j = 0; j < 5; j++) {
+                if (j == 0) {
+                    data[i][j] = employees[i].getForename();
+                } else if (j == 1) {
+                    data[i][j] = employees[i].getSurname();
+                } else if (j == 2) {
+                    data[i][j] = employees[i].getJobsEnum();
+                } else if (j == 3) {
+                    data[i][j] = employees[i].getYearsOfWork();
+                } else {
+                    data[i][j] = employees[i].getSalary();
+                }
+            }
+        }
+        return data;
     }
 }
 
