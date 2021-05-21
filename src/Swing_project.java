@@ -153,57 +153,61 @@ public class Swing_project {
             int info = fileChooser.showOpenDialog(frame);
             if (fileChooser.getSelectedFile() != null && info == JFileChooser.APPROVE_OPTION) {
                 if (fileChooser.getSelectedFile().getName().endsWith(".empl")) {
-                    panelMain.removeAll();
-                    String option = fileChooser.getSelectedFile().getAbsolutePath();
-                    GetFromTXT getFromTXT = new GetFromTXT();
-                    int lines = getFromTXT.countFileLines(option);
-                    Employee[] employees = getFromTXT.getFromFile(option, lines);
+                    if (fileChooser.getSelectedFile().exists()) {
+                        panelMain.removeAll();
+                        String option = fileChooser.getSelectedFile().getAbsolutePath();
+                        GetFromTXT getFromTXT = new GetFromTXT();
+                        int lines = getFromTXT.countFileLines(option);
+                        Employee[] employees = getFromTXT.getFromFile(option, lines);
 
-                    //Data for JTable
-                    Object[][] data = new Object[lines][5];
-                    for (int i = 0; i < lines; i++) {
-                        for (int j = 0; j < 5; j++) {
-                            if (j == 0) {
-                                data[i][j] = employees[i].getForename();
-                            } else if (j == 1) {
-                                data[i][j] = employees[i].getSurname();
-                            } else if (j == 2) {
-                                data[i][j] = employees[i].getJobsEnum();
-                            } else if (j == 3) {
-                                data[i][j] = employees[i].getYearsOfWork();
-                            } else {
-                                data[i][j] = employees[i].getSalary();
+                        //Data for JTable
+                        Object[][] data = new Object[lines][5];
+                        for (int i = 0; i < lines; i++) {
+                            for (int j = 0; j < 5; j++) {
+                                if (j == 0) {
+                                    data[i][j] = employees[i].getForename();
+                                } else if (j == 1) {
+                                    data[i][j] = employees[i].getSurname();
+                                } else if (j == 2) {
+                                    data[i][j] = employees[i].getJobsEnum();
+                                } else if (j == 3) {
+                                    data[i][j] = employees[i].getYearsOfWork();
+                                } else {
+                                    data[i][j] = employees[i].getSalary();
+                                }
                             }
                         }
+
+                        //JTable creation
+                        model.set(new DefaultTableModel(data, columnNames) {
+                            @Override
+                            public Class<?> getColumnClass(int columnIndex) {
+                                if (columnIndex == 0) {
+                                    return String.class;
+                                }
+                                if (columnIndex == 1) {
+                                    return String.class;
+                                }
+                                if (columnIndex == 2) {
+                                    return Enum.class;
+                                }
+                                if (columnIndex == 3) {
+                                    return Integer.class;
+                                }
+                                if (columnIndex == 4) {
+                                    return Integer.class;
+                                } else return String.class;
+                            }
+                        });
+                        table.set(new JTable(model.get()));
+
+                        //Adding JTable to panelMain
+                        new CreateTable(panelMain, frame, table.get());
+                        panelMain.add(panelFilter, BorderLayout.PAGE_END);
+                    } else {
+                        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Wybrany plik nie istnieje.", "Zły plik", JOptionPane.WARNING_MESSAGE));
                     }
-
-                    //JTable creation
-                    model.set(new DefaultTableModel(data, columnNames) {
-                        @Override
-                        public Class<?> getColumnClass(int columnIndex) {
-                            if (columnIndex == 0) {
-                                return String.class;
-                            }
-                            if (columnIndex == 1) {
-                                return String.class;
-                            }
-                            if (columnIndex == 2) {
-                                return Enum.class;
-                            }
-                            if (columnIndex == 3) {
-                                return Integer.class;
-                            }
-                            if (columnIndex == 4) {
-                                return Integer.class;
-                            } else return String.class;
-                        }
-                    });
-                    table.set(new JTable(model.get()));
-
-                    //Adding JTable to panelMain
-                    new CreateTable(panelMain, frame, table.get());
-                    panelMain.add(panelFilter, BorderLayout.PAGE_END);
-                } else {
+                }else {
                     SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Wybierz właściwy format pliku.", "Zły format pliku", JOptionPane.WARNING_MESSAGE));
                 }
             }
@@ -226,7 +230,7 @@ public class Swing_project {
                 try {
                     fileStream = new PrintStream(file);
                 } catch (FileNotFoundException fileNotFoundException) {
-                    fileNotFoundException.printStackTrace();
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Błędna nazwa. Podaj poprawną nazwę pliku.", "Błędna nazwa pliku", JOptionPane.WARNING_MESSAGE));
                 }
                 for (int i = 0; i < table.get().getRowCount(); i++) {
                     for (int j = 0; j < table.get().getColumnCount(); j++) {
