@@ -59,7 +59,7 @@ public class Swing_project {
 
         //Frame and panelMain Section
         frame.pack();
-        frame.setIconImage(new ImageIcon("excel-chart.png").getImage());
+        frame.setIconImage(new ImageIcon("GUI_icon.png").getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(panelMain);
         frame.setSize(700, 500);
