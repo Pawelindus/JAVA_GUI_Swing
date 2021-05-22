@@ -481,13 +481,13 @@ class Employee {
     public Employee() {
     }
 
-    public Employee(String forename, String surname, Enum<Jobs> jobsEnum, Integer yearsOfWork, Integer salary) {
+    /*public Employee(String forename, String surname, Enum<Jobs> jobsEnum, Integer yearsOfWork, Integer salary) {
         this.forename = forename;
         this.surname = surname;
         this.jobsEnum = jobsEnum;
         this.yearsOfWork = yearsOfWork;
         this.salary = salary;
-    }
+    }*/
 
     public String getForename() {
         return forename;
@@ -559,6 +559,11 @@ enum Jobs {
     public int getMax() {
         return max;
     }
+
+    public String showTip(){
+        return this.name() + ": " + "min: " + this.getMin() + ", max: " + this.getMax();
+    }
+
 }
 
 class GetFromTXT {
@@ -689,24 +694,44 @@ class CreateTable {
         }
         class EnumComparator implements Comparator<Jobs> {
             public int compare(Jobs o1, Jobs o2) {
-                return o1.compareTo(o2);
+                return o1.name().compareTo(o2.name());
             }
         }
+        /*class EnumComparator implements Comparator<Jobs> {
+            public int compare(Jobs o1, Jobs o2) {
+                return o1.compareTo(o2);
+            }                                                   //Sorting by Jobs Status, not by Alphabetical order
+        }*/
         tableRowSorter.setComparator(0, new StringComparator());
         tableRowSorter.setComparator(1, new StringComparator());
         tableRowSorter.setComparator(2, new EnumComparator());
         tableRowSorter.setComparator(3, new IntComparator());
         tableRowSorter.setComparator(4, new IntComparator());
         table.setRowSorter(tableRowSorter);
+
         JComboBox<Jobs> comboBox = new JComboBox<>();
-        comboBox.addItem(Jobs.CEO);
         comboBox.addItem(Jobs.ACCOUNTING);
+        comboBox.addItem(Jobs.CEO);
         comboBox.addItem(Jobs.MANAGER);
         comboBox.addItem(Jobs.MARKETING);
         comboBox.addItem(Jobs.QUALITY_CONTROL);
         comboBox.addItem(Jobs.RECEPTIONIST);
         TableColumn jobColumn = table.getColumnModel().getColumn(2);
         jobColumn.setCellEditor(new DefaultCellEditor(comboBox));
+        comboBox.setToolTipText("<html>"
+                + Jobs.ACCOUNTING.showTip()
+                + "<br>"
+                + Jobs.CEO.showTip()
+                + "<br>"
+                + Jobs.MANAGER.showTip()
+                + "<br>"
+                + Jobs.MARKETING.showTip()
+                + "<br>"
+                + Jobs.QUALITY_CONTROL.showTip()
+                + "<br>"
+                + Jobs.RECEPTIONIST.showTip()
+                + "</html>");
+        comboBox.createToolTip();
 
         table.repaint();
         table.revalidate();
